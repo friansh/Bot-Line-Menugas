@@ -1,9 +1,6 @@
 <?php
 
-require_once(__DIR__ . '/LINEBotTiny.php');
-require_once(__DIR__ . '/LINEMsgParams.php');
-require_once(__DIR__ . '/Database.php');
-require_once(__DIR__ . '/Variables.php');
+require('load.php');
 
 $client = new LINEBotTiny(Variables::$channelAccessToken,
                             Variables::$channelSecret);
