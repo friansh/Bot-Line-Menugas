@@ -2,8 +2,8 @@
 
 require_once(__DIR__ . '/LINEBotTiny.php');
 require_once(__DIR__ . '/LINEMsgParams.php');
-require_once(__DIR__ . '/Library/Database.php');
-require_once(__DIR__ . '/Config/Variables.php');
+require_once(__DIR__ . '/Database.php');
+require_once(__DIR__ . '/Variables.php');
 
 $client = new LINEBotTiny(Variables::$channelAccessToken,
                             Variables::$channelSecret);
