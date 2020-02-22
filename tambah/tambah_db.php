@@ -1,7 +1,7 @@
 <?php
 
-require_once('../database.php');
-require_once('../variables.php');
+require_once('../Library/Database.php');
+require_once('../Config/Variables.php');
 
 if (!session_id()) session_start();
 
