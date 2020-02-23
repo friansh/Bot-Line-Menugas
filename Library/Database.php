@@ -24,6 +24,22 @@ class Database{
         return true;
     }
 
+    public function addData(){
+
+    }
+
+    public function delete($table, $column, $find){
+        return $this->query("DELETE FROM " . $table . " WHERE " . $column . "='" . $find . "'");
+    }
+
+    public function select($table, $column='*', bool $multi=true){
+        return $this->query("SELECT " . $column . " FROM " . $table, $multi);
+    }
+
+    public function search($table, $column, $find, bool $multi=false){
+        return $this->query("SELECT * FROM " . $table . " WHERE " . $column . " ='" . $find . "'", $multi);
+    }
+
     public function query($query, bool $multi=false){
         $result = self::$conn->query($query);
         if ( !is_bool($result) and !is_array($result)){

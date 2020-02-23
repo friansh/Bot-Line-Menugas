@@ -2,21 +2,13 @@
 
 require('load.php');
 
-$client = new LINEBotTiny(Variables::$channelAccessToken,
-                            Variables::$channelSecret);
+$client = new LINEBotTiny(channelAccessToken, channelSecret);
 $db = new Database();
-
-Database::prepare(Variables::$db_host,
-                    Variables::$db_username,
-                    Variables::$db_password,
-                    Variables::$db_name);
-
-Database::connect();
 
 foreach ($client->parseEvents() as $event) {
     switch ($event['type']) {
         case 'message':
-            $usrr = $db->query("SELECT * FROM users WHERE userid ='" . $event['source']['userId'] . "';");
+            $usrr = $db->search('users', 'userid', $event['source']['userId']);
             if ( $usrr != null ){
                 $message = $event['message'];
                 switch ($message['type']) {
@@ -87,7 +79,7 @@ foreach ($client->parseEvents() as $event) {
                                     break;
 
                                 case 'kamu bisa jawab apa aja bot?':
-                                    $result = $db->query("SELECT command FROM response", true);
+                                    $result = $db->select('response', 'command');
                                     $count = 1;
                                     $teks = "Aku bisa jawab pertanyaan di bawah inii: \n\n[perintah yang hardcoded]\n1. ada tugas apa aja?\n2. bot, tolong tambahin tugas {nama tugas}\n3. bot, tolong hapusin tugas {nama tugas}\n4. dadah bot, makasi yaa\n5. apa useridku?\n6. kamu bisa jawab apa aja bot?\n7. siapa aku?\n\n[perintah yang ada di database]\n";
                                     foreach ( $result as $row ) {
@@ -159,8 +151,8 @@ foreach ($client->parseEvents() as $event) {
             $client->replyMessage($params);
             break;
 
-        case 'left':
-            $db->query("DELETE FROM `groups` WHERE groupid='" . $event['source']['groupId'] . "'");
+        case 'leave':
+            $db->delete('groups', 'groupId', $event['source']['groupId']);
             break;
 
         case 'follow':
@@ -172,24 +164,6 @@ foreach ($client->parseEvents() as $event) {
             break;
     }
 };
-
-function lineLeftGrup($groupId){
-    $ch = curl_init();
-
-    curl_setopt_array($ch, [
-        CURLOPT_URL => "https://api.line.me/v2/bot/group/" . $groupId ."/leave",
-        CURLOPT_POST => 1,
-        CURLOPT_RETURNTRANSFER => 1,
-        CURLOPT_HTTPHEADER => [
-            'Content-Type: application/json',
-            'Authorization: Bearer 5Thtncw74BKlpqvIlrtex+DVAmqNiCUIXcVntT0rUhLUS/+SAC5vJP+FnpaJ/LKYckQf5E2mZ+CCU6Z12o3rnaNiMFvmW/GAPEyILJ097tnLeV1JY1DFNDuwi3jFxDvxfd8Ea8KDMaas4zsvHQAcvAdB04t89/1O/w1cDnyilFU=',
-        ]
-    ]);
-
-    $output = json_decode(curl_exec($ch));
-    curl_close($ch);
-    return (array)$output;
-}
 
 function lineSiapaAkun($userId){
     $ch = curl_init();
@@ -206,5 +180,25 @@ function lineSiapaAkun($userId){
     $output = json_decode(curl_exec($ch));
     curl_close($ch);
     return (array)$output;
+}
+
+function lineLeftGrup($groupId) {
+    $header = array(
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . channelAccessToken,
+    );
+
+    $context = stream_context_create([
+        'http' => [
+            'ignore_errors' => true,
+            'method' => 'POST',
+            'header' => implode("\r\n", $header)
+        ],
+    ]);
+
+    $response = file_get_contents("https://api.line.me/v2/bot/group/" . $groupId ."/leave", false, $context);
+    if (strpos($http_response_header[0], '200') === false) {
+        error_log('Request failed: ' . $response);
+    }
 }
 
